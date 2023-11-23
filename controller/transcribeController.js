@@ -95,4 +95,32 @@ const convertTomp3 = asyncHandler(async (req, res) => {
     .save("./uploads");
 });
 
-module.exports = { createTranscript, convertTomp3 };
+const createSummary = asyncHandler(async (req, res) => {
+  console.log(req.body);
+
+  const content = req.body.content;
+
+  // GET SUMMARY FROM OPENAI
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert text analyzer. Remove any extraneous language, focusing only on the critical aspects of the passage or topic.",
+        },
+        { role: "user", content: content },
+      ],
+      model: "gpt-3.5-turbo",
+    });
+
+    console.log(completion?.choices[0]?.message?.content);
+    const summary = completion?.choices[0]?.message?.content;
+    res.status(201).json(summary);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json("Failed!");
+  }
+});
+
+module.exports = { createTranscript, convertTomp3, createSummary };

@@ -2,6 +2,7 @@ const express = require("express");
 const {
   createTranscript,
   convertTomp3,
+  createSummary,
 } = require("../controller/transcribeController");
 const multer = require("multer");
 
@@ -34,5 +35,6 @@ router.route("/create").post(
   createTranscript
 );
 router.route("/convert").post(convertTomp3);
+router.route("/notes").post(createSummary);
 
 module.exports = router;
