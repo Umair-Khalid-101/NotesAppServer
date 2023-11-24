@@ -3,6 +3,7 @@ const {
   createTranscript,
   convertTomp3,
   createSummary,
+  createFileTranscript,
 } = require("../controller/transcribeController");
 const multer = require("multer");
 
@@ -33,6 +34,22 @@ router.route("/create").post(
     next();
   },
   createTranscript
+);
+router.route("/filecreate").post(
+  upload.single("file"),
+  (req, res, next) => {
+    // Check if a file was actually uploaded
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    // Log the information about the uploaded file
+    console.log("Uploaded file:", req.file);
+
+    // Call the next middleware (createTranscript) only if the file is uploaded successfully
+    next();
+  },
+  createFileTranscript
 );
 router.route("/convert").post(convertTomp3);
 router.route("/notes").post(createSummary);

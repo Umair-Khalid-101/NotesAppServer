@@ -77,6 +77,46 @@ const createTranscript = asyncHandler(async (req, res) => {
   // res.status(201).json("API HIT!");
 });
 
+const createFileTranscript = asyncHandler(async (req, res) => {
+  console.log("POST REQ at EndPoint: `/filecreate`");
+  console.log(req.file);
+
+  // DELETE THE ORIGINAL FILE
+  // fs.unlink(`./uploads/${req.file.originalname}`, (error) => {
+  //   if (error) {
+  //     console.log("Error Deleting File", error);
+  //   } else {
+  //     console.log(`File: ${req.file.originalname} Deleted Successfully`);
+  //   }
+  // });
+
+  // TRANSCRIBE THE AUDIO FILE
+  const audioPath = `./uploads/${req.file.originalname}`;
+  try {
+    const transcription = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(audioPath),
+      model: "whisper-1",
+    });
+    console.log(transcription.text);
+
+    // DELETE THE CONVERTED MP3 FILE AFTER TRANSCRIPTION
+    fs.unlink(audioPath, (error) => {
+      if (error) {
+        console.log("Error Deleting MP3 File", error);
+      } else {
+        console.log(`MP3 File: ${audioPath} Deleted Successfully`);
+      }
+    });
+
+    res.status(201).json(transcription.text);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json("Error Transcribing the file!");
+  }
+
+  // res.status(201).json("API HIT!");
+});
+
 const convertTomp3 = asyncHandler(async (req, res) => {
   console.log("POST REQ at EndPoint: `/convert`");
   const inputFilePath = "harvard.wav";
@@ -123,4 +163,9 @@ const createSummary = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { createTranscript, convertTomp3, createSummary };
+module.exports = {
+  createTranscript,
+  convertTomp3,
+  createSummary,
+  createFileTranscript,
+};
